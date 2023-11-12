@@ -12,6 +12,8 @@ export const CartCookieContent = z.array(
 );
 export type CartCookieContent = z.infer<typeof CartCookieContent>;
 
+export type CartItem = CartCookieContent[number];
+
 export const AddProductRequestBody = z.object({
   productId: z.number(),
 });

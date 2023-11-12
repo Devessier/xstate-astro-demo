@@ -10,6 +10,8 @@ import { clsx } from "clsx";
 import type { CartCookieContent } from "../types";
 import { useActor } from "@xstate/react";
 import { cartService } from "../shared/cart";
+import { useStore } from '@nanostores/react';
+import { $cart } from "../shared/cart-store";
 
 const navigation = {
   categories: [
@@ -146,29 +148,15 @@ interface AppNavabarProps {
   cart: CartCookieContent | undefined;
 }
 
-export function AppNavbar({ isSignedIn, cart: initialCart }: AppNavabarProps) {
+export function AppNavbar({ isSignedIn }: AppNavabarProps) {
   const [open, setOpen] = useState(false);
-  const [state, send] = useActor(cartService);
 
-  console.log({ "state.context.cart": state.context.cart, initialCart });
-  const cart = state.context.cart ?? initialCart ?? [];
+  const cart = useStore($cart);
 
   const productCount = cart.reduce(
     (count, product) => count + product.quantity,
     0
   );
-
-  // Synchronize state machine put in a shared stateful module with data coming from the server.
-  useEffect(() => {
-    if (initialCart === undefined) {
-      return;
-    }
-
-    send({
-      type: "Update cart",
-      cart: initialCart,
-    });
-  }, [initialCart]);
 
   return (
     <>
@@ -642,13 +630,13 @@ export function AppNavbar({ isSignedIn, cart: initialCart }: AppNavabarProps) {
                       <ShoppingBagIcon
                         className={clsx(
                           "h-6 w-6 flex-shrink-0 transition-colors",
-                          state.matches("Animating cart") ? 'text-indigo-700' : 'text-gray-400 group-hover:text-gray-500'
+                          false ? 'text-indigo-700' : 'text-gray-400 group-hover:text-gray-500'
                         )}
                         aria-hidden="true"
                       />
                       <span className={clsx(
                         "ml-2 text-sm font-medium transition-colors",
-                        state.matches("Animating cart") ? 'text-indigo-700' : 'text-gray-700 group-hover:text-gray-800'
+                        false ? 'text-indigo-700' : 'text-gray-700 group-hover:text-gray-800'
                       )}>
                         {productCount}
                       </span>
@@ -699,22 +687,6 @@ export function AppNavbar({ isSignedIn, cart: initialCart }: AppNavabarProps) {
                                         <p className="hidden text-gray-500 sm:block">
                                           S
                                         </p> */}
-                                      </div>
-                                      <div className="flex flex-none space-x-4">
-                                        <button
-                                          type="button"
-                                          className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                                        >
-                                          Edit
-                                        </button>
-                                        <div className="flex border-l border-gray-300 pl-4">
-                                          <button
-                                            type="button"
-                                            className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                                          >
-                                            Remove
-                                          </button>
-                                        </div>
                                       </div>
                                     </div>
                                   </div>
