@@ -4,7 +4,6 @@ import { clsx } from "clsx";
 import { QueryClientProvider, useMutation } from "@tanstack/react-query";
 import { queryClient } from "../shared/queryClient";
 import { AddProductResponseBody, type AddProductRequestBody } from "../types";
-import { cartService } from "../shared/cart";
 
 interface ProductPageAddToCartProps {
   productId: number;
@@ -30,12 +29,7 @@ function ProductPageAddToCartBase({
       return AddProductResponseBody.parse(await res.json());
     },
     onSuccess: ({ cart }) => {
-      console.log("cart", cart);
-
-      cartService.send({
-        type: "Product added to cart",
-        cart,
-      });
+      // TODO: Add product to cart state.
     },
     onError: console.error,
   });
