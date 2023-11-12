@@ -1,0 +1,95 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { clsx } from "clsx";
+import { ProductPageReviews } from "../../components/ProductPageReviews";
+import { ProductPageAddToCart } from "../../components/ProductPageAddToCart";
+import { ProductPagePolicies } from "../../components/ProductPagePolicies";
+import { fetchProductData } from '../../services/products'
+
+const product = await fetchProductData({ productId: Number(Astro.params.id) })
+if (product === undefined) {
+  return Astro.redirect('/404')
+}
+---
+
+<Layout title={product.name}>
+  <main
+    class="mx-auto mt-8 max-w-2xl px-4 pb-16 sm:px-6 sm:pb-24 lg:max-w-7xl lg:px-8"
+  >
+    <div class="lg:grid lg:auto-rows-min lg:grid-cols-12 lg:gap-x-8">
+      <div class="lg:col-span-5 lg:col-start-8">
+        <div class="flex justify-between">
+          <h1 class="text-xl font-medium text-gray-900">
+            {product.name}
+          </h1>
+          <p class="text-xl font-medium text-gray-900">{product.price}</p>
+        </div>
+        {/* Reviews */}
+        <div class="mt-4">
+          <h2 class="sr-only">Reviews</h2>
+          <ProductPageReviews
+            score={product.reviews.average}
+            reviewsCount={product.reviews.totalCount}
+          />
+        </div>
+      </div>
+
+      {/* Image gallery */}
+      <div
+        class="mt-8 lg:col-span-7 lg:col-start-1 lg:row-span-3 lg:row-start-1 lg:mt-0"
+      >
+        <h2 class="sr-only">Images</h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-3 lg:gap-8">
+          {
+            product.images.map((image, index) => (
+              <img
+                src={image.imageSrc}
+                alt={image.imageAlt}
+                transition:name={
+                  index === 0 ? `product-image:${product.id}` : undefined
+                }
+                class={clsx(
+                  image.primary
+                    ? "lg:col-span-2 lg:row-span-2"
+                    : "hidden lg:block",
+                  "rounded-lg"
+                )}
+              />
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="mt-8 lg:col-span-5">
+        <ProductPageAddToCart
+          client:load
+          productId={product.id}
+          colors={product.colors}
+          sizes={product.sizes}
+        />
+
+        {/* Product details */}
+        <div class="mt-10">
+          <h2 class="text-sm font-medium text-gray-900">Description</h2>
+
+          <div class="prose prose-sm mt-4 text-gray-500">
+            <Fragment set:html={product.description} />
+          </div>
+        </div>
+
+        <div class="mt-8 border-t border-gray-200 pt-8">
+          <h2 class="text-sm font-medium text-gray-900">Fabric &amp; Care</h2>
+
+          <div class="prose prose-sm mt-4 text-gray-500">
+            <ul role="list">
+              {product.details.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+        </div>
+
+        <ProductPagePolicies />
+      </div>
+    </div>
+  </main>
+</Layout>

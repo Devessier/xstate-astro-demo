@@ -1,0 +1,151 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { zfd } from "zod-form-data";
+import { z } from 'zod'
+import { clsx } from 'clsx'
+
+if (Astro.locals.isAuthenticated === true) {
+  return Astro.redirect('/')
+}
+
+const signInFormScheme = zfd.formData({
+  email: zfd.text(z.string().email({ message: 'Email field must be a valid email.' })),
+  password: zfd.text(z.string({ required_error: "Password field must not be empty." }).nonempty({ message: 'Password field must not be empty.' })),
+});
+const formErrors: Partial<Record<string, string>> = {}
+
+if (Astro.request.method === "POST") {
+  const rawFormData = await Astro.request.formData()
+  const formData = signInFormScheme.safeParse(Object.fromEntries(rawFormData.entries()))
+
+  if (formData.success === true) {
+    if (formData.data.email.endsWith('@astro.build')) {
+      Astro.cookies.set("user", JSON.stringify({ email: formData.data.email }));
+
+      return Astro.redirect("/");
+    }
+
+    formErrors.email = 'Invalid credentials.'
+  } else {
+    for (const [field, [firstError]] of Object.entries(formData.error.flatten().fieldErrors)) {
+      formErrors[field] = firstError
+    }
+  }
+}
+---
+
+<Layout title="Sign in">
+  <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+      <img
+        class="mx-auto h-10 w-auto"
+        src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
+        alt="Your Company"
+      />
+      <h2
+        class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900"
+      >
+        Sign in to your account
+      </h2>
+    </div>
+
+    <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+      <form class="space-y-6" method="POST">
+        <div>
+          <label
+            for="email"
+            class="block text-sm font-medium leading-6 text-gray-900"
+            >Email address</label
+          >
+          <div class="relative mt-2">
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              aria-invalid={formErrors.email !== undefined}
+              aria-describedby={formErrors.email !== undefined ? "email-error" : null}
+              class={clsx([
+                'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6',
+                formErrors.email === undefined ? 'ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600' : 'ring-red-300 placeholder:text-red-300 focus:ring-red-500',
+              ])}
+            />
+
+            {formErrors.email !== undefined ? (
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            ) : null}
+          </div>
+          {formErrors.email !== undefined ? (
+            <p class="mt-2 text-sm text-red-600" id="email-error">{formErrors.email}</p>
+          ) : null}
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between">
+            <label
+              for="password"
+              class="block text-sm font-medium leading-6 text-gray-900"
+              >Password</label
+            >
+            <div class="text-sm">
+              <a
+                href="#"
+                class="font-semibold text-indigo-600 hover:text-indigo-500"
+                >Forgot password?</a
+              >
+            </div>
+          </div>
+          <div class="relative mt-2">
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+              aria-invalid={formErrors.password !== undefined}
+              aria-describedby={formErrors.password !== undefined ? "password-error" : null}
+              class={clsx([
+                'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6',
+                formErrors.password === undefined ? 'ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600' : 'ring-red-300 placeholder:text-red-300 focus:ring-red-500',
+              ])}
+              class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            />
+
+            {formErrors.password !== undefined ? (
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            ) : null}
+          </div>
+          {formErrors.password !== undefined ? (
+            <p class="mt-2 text-sm text-red-600" id="password-error">{formErrors.password}</p>
+          ) : null}
+        </div>
+
+        <div>
+          <button
+            type="submit"
+            class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >Sign in</button
+          >
+        </div>
+      </form>
+
+      <p class="mt-10 text-center text-sm text-gray-500">
+        Not a member?
+        <a
+          href="/sign-up"
+          class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+          >Sign up to spend your money</a
+        >
+      </p>
+    </div>
+  </div>
+</Layout>
