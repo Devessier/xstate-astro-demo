@@ -10,8 +10,8 @@ import { clsx } from "clsx";
 import type { CartCookieContent } from "../types";
 import { useActor } from "@xstate/react";
 import { cartService } from "../shared/cart";
-import { useStore } from '@nanostores/react';
-import { $cart } from "../shared/cart-store";
+import { useStore } from "@nanostores/react";
+import { $cart, $cartAnimation } from "../shared/cart-store";
 
 const navigation = {
   categories: [
@@ -152,6 +152,7 @@ export function AppNavbar({ isSignedIn }: AppNavabarProps) {
   const [open, setOpen] = useState(false);
 
   const cart = useStore($cart);
+  const cartAnimation = useStore($cartAnimation);
 
   const productCount = cart.reduce(
     (count, product) => count + product.quantity,
@@ -630,14 +631,20 @@ export function AppNavbar({ isSignedIn }: AppNavabarProps) {
                       <ShoppingBagIcon
                         className={clsx(
                           "h-6 w-6 flex-shrink-0 transition-colors",
-                          false ? 'text-indigo-700' : 'text-gray-400 group-hover:text-gray-500'
+                          cartAnimation === true
+                            ? "text-indigo-700"
+                            : "text-gray-400 group-hover:text-gray-500"
                         )}
                         aria-hidden="true"
                       />
-                      <span className={clsx(
-                        "ml-2 text-sm font-medium transition-colors",
-                        false ? 'text-indigo-700' : 'text-gray-700 group-hover:text-gray-800'
-                      )}>
+                      <span
+                        className={clsx(
+                          "ml-2 text-sm font-medium transition-colors",
+                          cartAnimation === true
+                            ? "text-indigo-700"
+                            : "text-gray-700 group-hover:text-gray-800"
+                        )}
+                      >
                         {productCount}
                       </span>
                       <span className="sr-only">items in cart, view bag</span>
