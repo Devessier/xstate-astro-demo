@@ -8,6 +8,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { clsx } from "clsx";
 import type { CartItem } from "../types";
+import { useStore } from '@nanostores/react'
+import { $cart, $cartAnimation } from "../shared/cart";
 
 const navigation = {
   categories: [
@@ -142,7 +144,8 @@ const navigation = {
 export function AppNavbar() {
   const [open, setOpen] = useState(false);
 
-  const cart: CartItem[] = [];
+  const cart = useStore($cart);
+  const cartAnimation = useStore($cartAnimation);
 
   const productCount = cart.reduce(
     (count, product) => count + product.quantity,
@@ -514,7 +517,7 @@ export function AppNavbar() {
                       <ShoppingBagIcon
                         className={clsx(
                           "h-6 w-6 flex-shrink-0 transition-colors",
-                          false
+                          cartAnimation.isAnimating === true
                             ? "text-indigo-700"
                             : "text-gray-400 group-hover:text-gray-500"
                         )}
@@ -523,7 +526,7 @@ export function AppNavbar() {
                       <span
                         className={clsx(
                           "ml-2 text-sm font-medium transition-colors",
-                          false
+                          cartAnimation.isAnimating === true  
                             ? "text-indigo-700"
                             : "text-gray-700 group-hover:text-gray-800"
                         )}
