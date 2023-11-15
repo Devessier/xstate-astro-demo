@@ -8,6 +8,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { clsx } from "clsx";
 import type { CartItem } from "../types";
+import { useStore } from '@nanostores/react';
+import { $cart } from "../shared/cart";
 
 const navigation = {
   categories: [
@@ -142,7 +144,7 @@ const navigation = {
 export function AppNavbar() {
   const [open, setOpen] = useState(false);
 
-  const cart: CartItem[] = [];
+  const cart = useStore($cart);
 
   const productCount = cart.reduce(
     (count, product) => count + product.quantity,
