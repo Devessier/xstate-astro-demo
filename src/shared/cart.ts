@@ -3,13 +3,28 @@ import type { CartItem } from '../types';
 
 export const $cart = atom<CartItem[]>([]);
 
-export const $cartAnimation = atom<boolean>(false);
+export const $cartAnimation = atom<{
+    isAnimating: boolean,
+    timerId: number | undefined
+}>({
+    isAnimating: false,
+    timerId: undefined,
+});
 
 export function setCart(cart: CartItem[]) {
     $cart.set(cart);
 
-    $cartAnimation.set(true);
-    setTimeout(() => {
-        $cartAnimation.set(false);
+    clearTimeout($cartAnimation.get().timerId);
+
+    const timerId = setTimeout(() => {
+        $cartAnimation.set({
+            isAnimating: false,
+            timerId: undefined,
+        });
     }, 2_000);
+
+    $cartAnimation.set({
+        isAnimating: true,
+        timerId,
+    });
 }

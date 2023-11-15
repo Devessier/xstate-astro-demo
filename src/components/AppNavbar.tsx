@@ -517,7 +517,7 @@ export function AppNavbar() {
                       <ShoppingBagIcon
                         className={clsx(
                           "h-6 w-6 flex-shrink-0 transition-colors",
-                          cartAnimation === true
+                          cartAnimation.isAnimating === true
                             ? "text-indigo-700"
                             : "text-gray-400 group-hover:text-gray-500"
                         )}
@@ -526,7 +526,7 @@ export function AppNavbar() {
                       <span
                         className={clsx(
                           "ml-2 text-sm font-medium transition-colors",
-                          cartAnimation === true
+                          cartAnimation.isAnimating === true
                             ? "text-indigo-700"
                             : "text-gray-700 group-hover:text-gray-800"
                         )}
