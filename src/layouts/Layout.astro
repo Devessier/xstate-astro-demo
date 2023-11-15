@@ -28,7 +28,7 @@ const cart = getCartCookie(Astro.cookies)
 	</head>
 	<body class="h-full">
 		<div class="bg-white">
-			<AppNavbar isSignedIn={Astro.locals.isAuthenticated} {cart} client:load />
+			<AppNavbar client:load />
 
 			<slot />
 
